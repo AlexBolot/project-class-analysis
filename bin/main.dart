@@ -1,5 +1,21 @@
-import 'package:project_class_analysis/project_class_analysis.dart' as project_class_analysis;
+import 'dart:io';
 
-void main(List<String> arguments) {
-  print('Hello world: ${project_class_analysis.calculate()}!');
+import 'package:project_class_analysis/list_extension.dart';
+import 'package:project_class_analysis/project_class_analysis.dart';
+
+Future<void> main(List<String> arguments) async {
+  final directoryPath = arguments.first;
+  print('... Analysing $directoryPath ...');
+
+  final directory = Directory(directoryPath);
+  final List<FileSystemEntity> entities = await directory.list().toList();
+  final files = entities.whereType<File>();
+
+  final classNames = <String?>[];
+
+  for (var file in files) {
+    classNames.add(await FileAnalyser().getClassName(file));
+  }
+
+  print(classNames.whereNotNull());
 }
