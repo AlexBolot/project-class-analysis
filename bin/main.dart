@@ -8,15 +8,25 @@ Future<void> main(List<String> arguments) async {
   final directoryPath = arguments.first;
   print('... Analysing $directoryPath ...');
 
-  final directory = Directory(directoryPath);
-  final List<FileSystemEntity> entities = await directory.list().toList();
-  final files = entities.whereType<File>();
-
+  final files = await getAllFiles(Directory(directoryPath));
   final classModels = <ClassModel?>[];
 
   for (var file in files) {
     classModels.addAll(await FileAnalyser().extractClasses(file));
   }
 
-  print(classModels.whereNotNull().join('\n'));
+  print('-----------');
+  print(classModels.whereNotNull().join('\n-----------\n'));
+  print('-----------');
+}
+
+Future<List<File>> getAllFiles(Directory directory) async {
+  final List<FileSystemEntity> entities = await directory.list().toList();
+
+  final files = entities.whereType<File>().toList();
+  final dirs = entities.whereType<Directory>();
+  for (var directory in dirs) {
+    files.addAll(await getAllFiles(directory));
+  }
+  return files;
 }
