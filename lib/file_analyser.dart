@@ -17,8 +17,11 @@ class FileAnalyser {
 
     final classModels = <ClassModel?>[];
     for (String strClass in classes) {
+      final name = _extractClassName(strClass);
+
+      if (name == null || name.endsWith('Bean')) continue;
       final model = ClassModel(
-        name: _extractClassName(strClass),
+        name: name,
         parent: _extractParentClassName(strClass),
         mixins: _extractMixinNames(strClass),
         dependencies: _extractDependencies(strClass),
@@ -26,7 +29,7 @@ class FileAnalyser {
       classModels.add(model);
     }
 
-    return classModels.where((model) => model?.name?.isNotEmpty ?? false).whereNotNull();
+    return classModels.where((model) => model?.name.isNotEmpty ?? false).whereNotNull();
   }
 
   String? _extractClassName(String strClass) {
@@ -42,7 +45,9 @@ class FileAnalyser {
     final parentNamePattern = RegExp(r'extends [\w<>]* ');
 
     final rawParentName = parentNamePattern.firstStringMatch(strClass)?.trim();
-    return rawParentName == null ? null : ClassModel(name: rawParentName.split(' ')[1]);
+    return (rawParentName == null || rawParentName.startsWith('_'))
+        ? null
+        : ClassModel(name: rawParentName.split(' ')[1]);
   }
 
   List<ClassModel> _extractMixinNames(String strClass) {
@@ -73,9 +78,30 @@ class FileAnalyser {
         .first);
 
     final uniqueFields = fields
-        .where((element) => !['bool', 'int', 'String', 'DateTime', 'double'].contains(element))
+        .where(
+            (element) => !['num', 'bool', 'int', 'String', 'DateTime', 'double'].contains(element))
         .unique();
 
     return uniqueFields.map((field) => ClassModel(name: field)).toList();
   }
 }
+
+/*
+
+digraph finite_state_machine {
+	rankdir=BT;
+
+	node [shape = box; style=rounded];
+
+	Point -> GeoPoint [arrowhead=empty];
+	Point -> FilesModel [arrowhead=odot];
+  FileS3 -> Point [ arrowhead=ediamond];
+  City -> Point [arrowhead=ediamond];
+  BusStop -> Point [arrowhead=empty];
+  BusStop -> AdditionalDataMixin [arrowhead=odot];
+  AttachedFurniture -> BusStop [arrowhead=ediamond];
+  PointLineInfo -> BusStop [arrowhead=ediamond];
+}
+
+
+ */

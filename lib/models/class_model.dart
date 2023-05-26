@@ -1,5 +1,5 @@
 class ClassModel {
-  String? name;
+  String name;
   List<ClassModel> dependencies;
   List<ClassModel> mixins;
   ClassModel? parent;
@@ -12,9 +12,30 @@ class ClassModel {
   })  : dependencies = dependencies ?? <ClassModel>[],
         mixins = mixins ?? <ClassModel>[];
 
+  List<String> toGraphviz() {
+    var res = <String>[];
+    //res.add(name);
+
+    if (parent != null) {
+      res.add('$name -> ${parent!.name} [ arrowhead = empty ];');
+    }
+
+    for (var mixin in mixins) {
+      res.add('$name -> ${mixin.name} [ arrowhead = odot ];');
+    }
+
+    for (var dependency in dependencies) {
+      res.add('${dependency.name} -> $name [ arrowhead = ediamond ];');
+    }
+
+    res.removeWhere((line) => line.contains('Synchronizable'));
+
+    return res;
+  }
+
   @override
   String toString() {
-    var toString = name ?? '';
+    var toString = name;
 
     if (parent != null) {
       toString += '\n -> extends ${parent?.name}';

@@ -15,9 +15,7 @@ Future<void> main(List<String> arguments) async {
     classModels.addAll(await FileAnalyser().extractClasses(file));
   }
 
-  print('-----------');
-  print(classModels.whereNotNull().join('\n-----------\n'));
-  print('-----------');
+  print(classModels.whereNotNull().map((e) => e.toGraphviz().join('\n')).join('\n'));
 }
 
 Future<List<File>> getAllFiles(Directory directory) async {
