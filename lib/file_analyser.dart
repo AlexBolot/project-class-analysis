@@ -41,7 +41,7 @@ class FileAnalyser {
     // No class found
     if (rawClassName == null) return null;
 
-    var className = rawClassName.split(' ')[1].sanitizeClassName();
+    var className = rawClassName.split(' ')[1].removeGenericTypes();
 
     // We don't consider private classes
     if (className.isPrivateClassName()) return null;
@@ -57,7 +57,7 @@ class FileAnalyser {
     // No "extends" found
     if (rawParentName == null) return null;
 
-    var className = rawParentName.split(' ')[1].sanitizeClassName();
+    var className = rawParentName.split(' ')[1].removeGenericTypes();
 
     // We don't need that info
     if (className == 'Synchonizable') return null;
@@ -74,7 +74,9 @@ class FileAnalyser {
     final rawMixinNames = mixinsPattern.firstStringMatch(strClass);
     final mixinNames = rawMixinNames?.removeAll('with').trim().split(', ') ?? <String>[];
 
-    return mixinNames.map((mixin) => ClassModel(name: mixin)).toList();
+    return mixinNames
+        .map((mixin) => ClassModel(name: mixin.removeGenericTypes()))
+        .toList();
   }
 
   List<ClassModel> _extractDependencies(String strClass) {

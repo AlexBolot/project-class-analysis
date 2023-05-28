@@ -3,7 +3,7 @@ extension RemoveAll on String {
 
   bool isPrivateClassName() => startsWith('_');
 
-  String sanitizeClassName() => replaceAll('<', '≤').replaceAll('>', '≥');
+  String removeGenericTypes() => removeAll(RegExp(r'<\w+>'));
 
   String removeFirstWord() => (split(' ')..removeAt(0)).join(' ');
 }
