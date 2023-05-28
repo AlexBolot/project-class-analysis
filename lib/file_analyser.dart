@@ -34,20 +34,37 @@ class FileAnalyser {
 
   String? _extractClassName(String strClass) {
     /// Generates a String formatted as : "class ClassName "
-    final classNamePattern = RegExp(r'class [^_][\w<>]* ');
+    final classNamePattern = RegExp(r'class [\w<>]* ');
 
-    final rawClassName = classNamePattern.firstStringMatch(strClass)?.trim();
-    return rawClassName?.split(' ')[1];
+    final rawClassName = classNamePattern.firstStringMatch(strClass);
+
+    // No class found
+    if (rawClassName == null) return null;
+
+    var className = rawClassName.split(' ')[1].sanitizeClassName();
+
+    // We don't consider private classes
+    if (className.isPrivateClassName()) return null;
+
+    return className;
   }
 
   ClassModel? _extractParentClassName(String strClass) {
     /// Generates a String formatted as : "extends ClassName "
     final parentNamePattern = RegExp(r'extends [\w<>]* ');
+    final rawParentName = parentNamePattern.firstStringMatch(strClass);
 
-    final rawParentName = parentNamePattern.firstStringMatch(strClass)?.trim();
-    return (rawParentName == null || rawParentName.startsWith('_'))
-        ? null
-        : ClassModel(name: rawParentName.split(' ')[1]);
+    // No "extends" found
+    if (rawParentName == null) return null;
+
+    var className = rawParentName.split(' ')[1].sanitizeClassName();
+
+    // We don't need that info
+    if (className == 'Synchonizable') return null;
+    // We don't consider private classes
+    if (className.isPrivateClassName()) return null;
+
+    return ClassModel(name: className);
   }
 
   List<ClassModel> _extractMixinNames(String strClass) {

@@ -14,7 +14,6 @@ class ClassModel {
 
   List<String> toGraphviz() {
     var res = <String>[];
-    //res.add(name);
 
     if (parent != null) {
       res.add('$name -> ${parent!.name} [ arrowhead = empty ];');
